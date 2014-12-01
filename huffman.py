@@ -1,44 +1,45 @@
-from operator import itemgetter
-
-
 class Leaf(object):
-    """docstring for Leaf"""
     def __init__(self, symbol, weight):
         self.symbol = symbol
         self.weight = weight
 
 
 class Node(object):
-    """
-    """
-    def __init__(self, left=None, right=None):
+    def __init__(self, left, right):
         self.left = left
         self.right = right
-        # self.symbols = self.get_symbols(left) + self.get_symbols(right)
-        # self.weight = left.weight + right.weight
-
-    def get_symbols(self, tree):
-        if type(tree) is Leaf:
-            return [tree.symbol]
-        else:
-            return tree.symbols
 
 
 class HuffTree(object):
-    """docstring for HuffTree"""
-    def __init__(self, freq_dict=None, tree=None):
-        if freq_dict is not None:
-            sorted_tuples = sorted(freq_dict.items(),
-                                   reverse=True,
-                                   key=itemgetter(1))
-            self.tree = self._make_tree(sorted_tuples)
-        else:
-            self.tree = tree
+    """ Takes a already constructed HuffTree and encodes/decodes strings
+
+    Take a look at SICP 2.3.4 for what I implemented or just goole wikipedia
+    for a general overview
+
+    Methods of interest:
+        encode
+        decode
+    """
+    def __init__(self, tree):
+        self.tree = tree
 
     def decode(self, bits):
+        """Decodes a Huffman Binary into a message
+
+        Returns:
+            decoded str eg. "Hello World"
+        """
         return self._decode(bits, self.tree)
 
     def _decode(self, bits, current_branch):
+        """Recursively calls itself to decode bits
+
+        A helper method that uses recursiong and implicit state to recursively
+        call itself and find bits to encode a message with
+
+        Returns:
+            function call or char eg. "H"
+        """
         if bits is '':
             return ''
         else:
@@ -52,23 +53,48 @@ class HuffTree(object):
 
     @staticmethod
     def choose_branch(bit, branch):
+        """Chooses branch based on Huffman Tree
+
+        Short sweet lookup the splits in a Huffman tree
+
+        Returns:
+            Node or Leaf
+        """
         if bit is '0':
             return branch.left
         elif bit is '1':
             return branch.right
 
+    def encode(self, message):
+        """Encodes message in Huffman Binary
 
-sample_dict = {
-    "a": 4,
-    "c": 1,
-    "b": 2,
-    "d": 1
-}
+        This method is the aggregation of multiple encode_symbol calls
 
-sample_tree = Node(Leaf('a', 4),
-                   Node(Leaf('b', 2),
-                        Node(Leaf('d', 1), Leaf('c', 1))
-                        )
-                   )
+        Returns:
+            concated binary str eg. "01000101011001"
 
-sample_encode = "0110010101110"
+            note: returns a variable length binary
+        """
+        if message is '':
+            return ''
+        else:
+            return self.encode_symbol(message[0]) + self.encode(message[1:])
+
+    def encode_symbol(self, symbol):
+        """Walks the tree and finds the symbol then returns its binary string
+
+        Returns:
+            binary str eg. "010"
+
+            note: returns a variable length binary
+        """
+        queue = []
+        queue.append(('', self.tree))
+        while queue:
+            path, struct = queue.pop(0)
+            if type(struct) is Node:
+                queue.append((path+'0', struct.left))
+                queue.append((path+'1', struct.right))
+            else:
+                if struct.symbol is symbol:
+                    return path
