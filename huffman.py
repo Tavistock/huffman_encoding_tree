@@ -8,6 +8,8 @@ class Node(object):
     def __init__(self, left, right):
         self.left = left
         self.right = right
+        self.symbol = left.symbol + right.symbol
+        self.weight = left.weight + right.weight
 
 
 class HuffTree(object):
@@ -20,8 +22,12 @@ class HuffTree(object):
         encode
         decode
     """
-    def __init__(self, tree):
-        self.tree = tree
+    def __init__(self, tree=None, dict=None):
+        if dict is not None:
+            tuples = [(k, v) for k, v in dict.items()]
+            self.tree = self._make_tree(tuples)
+        else:
+            self.tree = tree
 
     def decode(self, bits):
         """Decodes a Huffman Binary into a message
@@ -98,3 +104,32 @@ class HuffTree(object):
             else:
                 if struct.symbol is symbol:
                     return path
+
+    def _make_tree(self, tuples):
+        leaves = [Leaf(symbol, weight) for symbol, weight in tuples]
+        alpha = sorted(leaves,
+                       key=lambda x: x.symbol,
+                       reverse=True)
+        return self._merge(alpha)
+
+    def _merge(self, ends):
+        if len(ends) >= 2:
+            desc_list = sorted(ends,
+                               key=lambda x: x.weight,
+                               reverse=True)
+            second, last = desc_list[-2:]
+            if len(ends) == 2:
+                return Node(second, last)
+            if len(ends) > 2:
+                lead = desc_list[:-2]
+                return self._merge(lead + [Node(second, last)])
+        else:
+            return ends
+
+
+sample_dict = {
+    "a": 4,
+    "c": 1,
+    "b": 2,
+    "d": 1
+}

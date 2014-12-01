@@ -12,8 +12,15 @@ sample_bits = "0110010101110"
 
 sample_text = 'adabbca'
 
+sample_dict = {
+    "a": 4,
+    "c": 1,
+    "b": 2,
+    "d": 1
+}
 
-class MyTest(unittest.TestCase):
+
+class FromTree(unittest.TestCase):
     def setUp(self):
         self.huff_tree = HuffTree(sample_tree)
 
@@ -23,10 +30,14 @@ class MyTest(unittest.TestCase):
     def test_decode(self):
         self.assertEqual(self.huff_tree.decode(sample_bits), sample_text)
 
-# someday I may implement this
-sample_dict = {
-    "a": 4,
-    "c": 1,
-    "b": 2,
-    "d": 1
-}
+
+class FromDict(unittest.TestCase):
+
+    def setUp(self):
+        self.huff_tree = HuffTree(dict=sample_dict)
+
+    def test_encode(self):
+        self.assertEqual(self.huff_tree.encode(sample_text), sample_bits)
+
+    def test_decode(self):
+        self.assertEqual(self.huff_tree.decode(sample_bits), sample_text)
