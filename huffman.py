@@ -22,13 +22,16 @@ class HuffTree(object):
         encode
         decode
     """
-    def __init__(self, tree=None, dict=None):
+    def __init__(self, tree=None, dict=None, tuple_list=None):
         if dict is not None:
             tuples = [(k, v) for k, v in dict.items()]
             self.tree = self._make_tree(tuples)
+        elif tuple_list is not None:
+            self.tree = self._make_tree(tuple_list)
         else:
             self.tree = tree
 
+    # DECODE
     def decode(self, bits):
         """Decodes a Huffman Binary into a message
 
@@ -49,8 +52,7 @@ class HuffTree(object):
         if bits is '':
             return ''
         else:
-            next_branch = self.choose_branch(bits[0],
-                                             current_branch)
+            next_branch = self._choose_branch(bits[0], current_branch)
             if type(next_branch) is Leaf:
                 return (next_branch.symbol +
                         self._decode(bits[1:], self.tree))
@@ -58,7 +60,7 @@ class HuffTree(object):
                 return self._decode(bits[1:], next_branch)
 
     @staticmethod
-    def choose_branch(bit, branch):
+    def _choose_branch(bit, branch):
         """Chooses branch based on Huffman Tree
 
         Short sweet lookup the splits in a Huffman tree
@@ -71,6 +73,7 @@ class HuffTree(object):
         elif bit is '1':
             return branch.right
 
+    # ENCODE
     def encode(self, message):
         """Encodes message in Huffman Binary
 
@@ -83,10 +86,13 @@ class HuffTree(object):
         """
         if message is '':
             return ''
-        else:
-            return self.encode_symbol(message[0]) + self.encode(message[1:])
 
-    def encode_symbol(self, symbol):
+        encoded = ''
+        for symbol in message:
+            encoded += self._encode_symbol(symbol)
+        return encoded
+
+    def _encode_symbol(self, symbol):
         """Walks the tree and finds the symbol then returns its binary string
 
         Returns:
@@ -107,24 +113,26 @@ class HuffTree(object):
 
     def _make_tree(self, tuples):
         leaves = [Leaf(symbol, weight) for symbol, weight in tuples]
-        alpha = sorted(leaves,
-                       key=lambda x: x.symbol,
-                       reverse=True)
-        return self._merge(alpha)
+        # Sort the list in alphabetical order to for tie-breaking equal weights
+        alphabetical = sorted(leaves, key=lambda x: x.symbol, reverse=True)
+        tree = self._merge(alphabetical)
+        return tree
 
-    def _merge(self, ends):
-        if len(ends) >= 2:
-            desc_list = sorted(ends,
-                               key=lambda x: x.weight,
-                               reverse=True)
+    def _merge(self, nodes):
+        if len(nodes) >= 2:
+            desc_list = sorted(nodes, key=lambda x: x.weight, reverse=True)
             second, last = desc_list[-2:]
-            if len(ends) == 2:
-                return Node(second, last)
-            if len(ends) > 2:
+
+            if len(nodes) > 2:
                 lead = desc_list[:-2]
                 return self._merge(lead + [Node(second, last)])
-        else:
-            return ends
+
+            elif len(nodes) == 2:
+                # Wrap final nodes in a node
+                return Node(second, last)
+
+        else:  # This should never happen
+            return nodes
 
 
 sample_dict = {
