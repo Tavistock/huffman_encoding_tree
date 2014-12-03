@@ -133,11 +133,3 @@ class HuffTree(object):
 
         else:  # This should never happen
             return nodes
-
-
-sample_dict = {
-    "a": 4,
-    "c": 1,
-    "b": 2,
-    "d": 1
-}
