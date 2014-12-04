@@ -45,9 +45,6 @@ class HuffTree(object):
 
         A helper method that uses recursiong and implicit state to recursively
         call itself and find bits to encode a message with
-
-        Returns:
-            function call or char eg. "H"
         """
         if bits is '':
             return ''
@@ -63,8 +60,6 @@ class HuffTree(object):
     def _choose_branch(bit, branch):
         """Chooses branch based on Huffman Tree
 
-        Short sweet lookup the splits in a Huffman tree
-
         Returns:
             Node or Leaf
         """
@@ -77,12 +72,8 @@ class HuffTree(object):
     def encode(self, message):
         """Encodes message in Huffman Binary
 
-        This method is the aggregation of multiple encode_symbol calls
-
         Returns:
             concated binary str eg. "01000101011001"
-
-            note: returns a variable length binary
         """
         if message is '':
             return ''
@@ -97,8 +88,6 @@ class HuffTree(object):
 
         Returns:
             binary str eg. "010"
-
-            note: returns a variable length binary
         """
         queue = []
         queue.append(('', self.tree))
@@ -111,6 +100,7 @@ class HuffTree(object):
                 if struct.symbol is symbol:
                     return path
 
+    # MAKE TREE
     def _make_tree(self, tuples):
         leaves = [Leaf(symbol, weight) for symbol, weight in tuples]
         # Sort the list in alphabetical order to for tie-breaking equal weights
